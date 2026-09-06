@@ -35,6 +35,15 @@ Equipment status is derived from dates rather than stored, so it can never go
 stale. Two states are set by hand and override the dates: *Under maintenance*
 and *Failed inspection*.
 
+## Documentation
+
+| File | Covers |
+| --- | --- |
+| [DEMO.md](DEMO.md) | Running the client demonstration, and the questions to expect |
+| [DEPLOY-LOWCOST.md](DEPLOY-LOWCOST.md) | Going live cheaply — Supabase, Cloud Run, Oracle free tier, small VPS |
+| [DEPLOY-HOSTINGER.md](DEPLOY-HOSTINGER.md) | Hostinger specifically: static on shared hosting, or the full stack on a VPS |
+| [DEPLOY-PRIVATE.md](DEPLOY-PRIVATE.md) | Keeping a client instance off Google and closed to everyone but them |
+
 ## Demo accounts
 
 Sign-in needs a user ID and password. The sign-in screen has a **Show demo
