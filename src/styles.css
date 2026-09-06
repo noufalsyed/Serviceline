@@ -221,7 +221,8 @@ a { color: var(--steel); }
 
 button, input, select, textarea { font-family: inherit; font-size: 14px; color: var(--ink); }
 
-input[type='text'], input[type='date'], input[type='search'], select, textarea {
+input[type='text'], input[type='password'], input[type='email'], input[type='tel'],
+input[type='number'], input[type='date'], input[type='search'], select, textarea {
   width: 100%;
   padding: 9px 11px;
   border: 1px solid var(--border);
@@ -652,8 +653,8 @@ details.more > summary::before {
 }
 details.more[open] > summary::before { transform: rotate(90deg); }
 
-.password-wrap { position: relative; display: block; }
-.password-wrap input { padding-right: 62px; }
+.password-wrap { position: relative; display: block; width: 100%; font-weight: 400; }
+.password-wrap input { width: 100%; padding-right: 62px; }
 .password-wrap .reveal {
   position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
   border: none; background: none; color: var(--steel);
