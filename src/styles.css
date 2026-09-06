@@ -368,6 +368,27 @@ table.data tbody tr.clickable:hover { background: var(--sunken); }
 
 /* ---------------- equipment detail ---------------- */
 
+/* At-a-glance strip on the equipment record — the four facts an engineer
+   reads first when a scan lands on the page. */
+.glance {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 1px; margin: 0 0 16px;
+  background: var(--border); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden;
+}
+.glance > div { background: var(--surface); padding: 11px 14px; }
+.glance dt {
+  font-size: 10.5px; font-weight: 600; letter-spacing: .05em;
+  text-transform: uppercase; color: var(--ink-3);
+}
+.glance dd { margin: 5px 0 0; font-size: 14px; font-weight: 600; }
+.glance dd span {
+  display: block; font-size: 11.5px; font-weight: 500; color: var(--ink-3); margin-top: 1px;
+}
+.glance > div.flag { background: var(--crit-bg); }
+.glance > div.flag dt { color: var(--crit); }
+.glance > div.flag dd, .glance > div.flag dd span { color: var(--crit); }
+
 .detail-top { display: grid; grid-template-columns: 1fr 268px; gap: 16px; align-items: start; }
 
 .spec { display: grid; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr)); gap: 0 22px; margin: 0; }

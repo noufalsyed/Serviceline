@@ -116,6 +116,27 @@ export default function EquipmentDetail() {
         </div>
       </div>
 
+      {/* At-a-glance strip: what an engineer standing at the equipment needs
+          to read the moment the scan lands, before scrolling anywhere. */}
+      <dl className="glance">
+        <div>
+          <dt>Status</dt>
+          <dd><StatusPill equipment={e} /></dd>
+        </div>
+        <div>
+          <dt>Last service</dt>
+          <dd className="num">{fmt(e.lastServiceDate)}</dd>
+        </div>
+        <div className={overdue ? 'flag' : undefined}>
+          <dt>Next service due</dt>
+          <dd className="num">{fmt(e.nextServiceDate)}<span>{relative(e.nextServiceDate)}</span></dd>
+        </div>
+        <div>
+          <dt>Installed</dt>
+          <dd className="num">{fmt(e.installDate)}</dd>
+        </div>
+      </dl>
+
       <div className="detail-top">
         <section className="panel">
           <h2>Equipment information</h2>
