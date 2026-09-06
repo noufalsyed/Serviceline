@@ -26,16 +26,34 @@ export default function EquipmentDetail() {
 
   if (!e) {
     return (
-      <section className="panel">
-        <p className="empty">
-          <Icon name="search" />
-          No equipment is registered against <b className="mono">{id}</b>.
-          <br />That label may belong to another system, or the item has been removed.
-        </p>
-        <p style={{ textAlign: 'center', paddingBottom: 24 }}>
-          <button className="btn" onClick={() => navigate('/scan')}><Icon name="qr" />Scan again</button>
-        </p>
-      </section>
+      <>
+        <div className="page-head"><h1>Not found on this device</h1></div>
+        <section className="panel">
+          <div className="body">
+            <p style={{ marginTop: 0 }}>
+              No equipment is registered against <b className="mono">{id}</b> in this browser.
+            </p>
+            <p className="muted" style={{ fontSize: 13.5 }}>
+              In this demonstration each browser keeps its own copy of the data, so equipment
+              added on one device is not visible on another. The sample equipment is present
+              everywhere; anything you added yourself lives only where you added it.
+            </p>
+            <p className="muted" style={{ fontSize: 13.5, marginBottom: 0 }}>
+              To move your data across, use <b>Backup and restore → Download file</b> on the
+              device that has it, then restore that file here. The production build stores
+              everything centrally, so this does not arise.
+            </p>
+            <div style={{ display: 'flex', gap: 9, marginTop: 16, flexWrap: 'wrap' }}>
+              <button className="btn primary" onClick={() => navigate('/scan')}>
+                <Icon name="qr" />Scan again
+              </button>
+              <button className="btn" onClick={() => navigate('/equipment')}>
+                <Icon name="equipment" />Browse the register
+              </button>
+            </div>
+          </div>
+        </section>
+      </>
     )
   }
 
