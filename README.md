@@ -44,26 +44,46 @@ No passwords — pick an account on the sign-in screen.
 To see the permission model working, sign in as Ahmed and open a Gulf Petrochem
 item — the record is refused, not merely hidden.
 
-## Trying the scan on a phone
+## Running it on your own machine
 
-Cameras need an HTTPS origin, which GitHub Pages provides. Open the deployed URL
-on a phone, sign in, tap **Scan**, and point it at a label printed from
-**QR labels**. On a desktop, use the manual ID field or the demo picker instead.
+**Double-click `start-demo.cmd`.** It installs dependencies on first run, then
+starts the server over HTTPS and opens your browser. Press Ctrl+C twice in that
+window to stop it.
 
-## Running locally
+Or from a terminal:
 
 ```bash
 npm install
-npm run dev
+npm run dev         # http://localhost:5173 — desktop work
+npm run dev:phone   # https, reachable from your phone
+npm run build       # production bundle into dist/
+npm run preview     # serve that bundle locally
 ```
 
-The dev server binds to your network address so you can open it on a phone,
-though the camera will stay blocked over plain HTTP — deploy to test scanning.
+### Scanning with your phone against this machine
 
-```bash
-npm run build     # production bundle into dist/
-npm run preview   # serve that bundle locally
-```
+Browsers only give a page the camera on a *secure origin*. `localhost` counts as
+secure; `192.168.x.x` does not — so `npm run dev:phone` serves HTTPS with a
+self-signed certificate.
+
+1. Start it. Vite prints two addresses — use the **Network** one on the phone.
+2. Both devices must be on the same Wi-Fi.
+3. The phone will warn that the certificate is not trusted. That is expected for
+   a local demo: tap **Advanced → Proceed** (Android) or **Show Details → visit
+   this website** (iOS). The camera works once you are through.
+4. Sign in, tap **Scan**, and point it at a label from the **QR labels** page.
+
+If the phone cannot reach the address at all, Windows Firewall is usually
+blocking Node — allow it on private networks, or run the demo on the deployed
+site instead.
+
+> **Labels printed locally only work locally.** A QR generated while running on
+> your machine encodes `https://192.168.x.x:5173/…`, which is dead outside your
+> Wi-Fi and once the server stops. Print labels a client will actually use from
+> the deployed GitHub Pages address.
+
+On a desktop with no camera, the Scan page's manual ID field and demo picker do
+the same job.
 
 ## Deploying to GitHub Pages
 
