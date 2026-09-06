@@ -260,13 +260,28 @@ const records = [
   })
 ]
 
+/**
+ * Demo credentials. These are shown on the sign-in screen because this is a
+ * public demonstration; they are hashed with PBKDF2 before being stored, and
+ * the plaintext never reaches the database. A real deployment issues
+ * credentials privately and forces a change on first sign-in.
+ */
+export const DEMO_PASSWORDS = {
+  'admin': 'Admin2026',
+  'sara.i': 'Manager2026',
+  'ahmed.a': 'Engineer2026',
+  'mohammed.f': 'Farooq2026',
+  'khalid.r': 'Client2026',
+  'layla.n': 'Viewer2026'
+}
+
 const users = [
-  { id: 'U-1', name: 'Nabil Haddad', role: 'Administrator', scopeCustomer: null, scopeSites: null },
-  { id: 'U-2', name: 'Sara Ibrahim', role: 'Manager', scopeCustomer: null, scopeSites: null },
-  { id: 'U-3', name: 'Ahmed Al-Otaibi', role: 'Service Engineer', scopeCustomer: null, scopeSites: ['S-A1', 'S-A2', 'S-A3'] },
-  { id: 'U-4', name: 'Mohammed Farooq', role: 'Service Engineer', scopeCustomer: null, scopeSites: ['S-B1', 'S-B2', 'S-C1', 'S-C2'] },
-  { id: 'U-5', name: 'Khalid Al-Rajhi', role: 'Client User', scopeCustomer: 'C-A', scopeSites: null },
-  { id: 'U-6', name: 'Layla Nasser', role: 'Viewer', scopeCustomer: 'C-B', scopeSites: null }
+  { id: 'USR-001', login: 'admin', name: 'Nabil Haddad', role: 'Administrator', active: true, permissions: null, scopeCustomer: null, scopeSites: null },
+  { id: 'USR-002', login: 'sara.i', name: 'Sara Ibrahim', role: 'Manager', active: true, permissions: null, scopeCustomer: null, scopeSites: null },
+  { id: 'USR-003', login: 'ahmed.a', name: 'Ahmed Al-Otaibi', role: 'Service Engineer', active: true, permissions: null, scopeCustomer: null, scopeSites: ['S-A1', 'S-A2', 'S-A3'] },
+  { id: 'USR-004', login: 'mohammed.f', name: 'Mohammed Farooq', role: 'Service Engineer', active: true, permissions: null, scopeCustomer: null, scopeSites: ['S-B1', 'S-B2', 'S-C1', 'S-C2'] },
+  { id: 'USR-005', login: 'khalid.r', name: 'Khalid Al-Rajhi', role: 'Client User', active: true, permissions: null, scopeCustomer: 'C-A', scopeSites: null },
+  { id: 'USR-006', login: 'layla.n', name: 'Layla Nasser', role: 'Viewer', active: true, permissions: null, scopeCustomer: 'C-B', scopeSites: null }
 ]
 
 const requests = [
@@ -285,12 +300,15 @@ const audit = [
 
 export function seed() {
   return {
+    version: 2,
     customers: structuredClone(customers),
     sites: structuredClone(sites),
     equipment: structuredClone(equipment),
     records: structuredClone(records),
     users: structuredClone(users),
     requests: structuredClone(requests),
-    audit: structuredClone(audit)
+    audit: structuredClone(audit),
+    backups: [],
+    settings: { backupSchedule: 'off', lastBackupAt: null }
   }
 }

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import Icon from '../components/Icon.jsx'
+import EquipmentForm from '../components/EquipmentForm.jsx'
 import { StatusPill } from '../components/Pill.jsx'
 import { useData } from '../lib/store.jsx'
 import { STATUS_FILTERS, matchesStatusFilter } from '../lib/status.js'
@@ -9,10 +10,11 @@ import { daysUntil, fmt, relative } from '../lib/dates.js'
 export default function EquipmentList() {
   const navigate = useNavigate()
   const [params, setParams] = useSearchParams()
-  const { db, myEquipment, customer, site, where, scopeLabel } = useData()
+  const { db, myEquipment, customer, site, where, scopeLabel, can, assignableSites } = useData()
 
   const q = params.get('q') || ''
   const [filters, setFilters] = useState({ customer: '', site: '', category: '', status: '' })
+  const [adding, setAdding] = useState(false)
 
   const customerIds = useMemo(
     () => [...new Set(myEquipment.map((e) => e.customerId))],
@@ -71,14 +73,26 @@ export default function EquipmentList() {
             {q && <> matching “{q}”</>}
           </p>
         </div>
-        {dirty && (
-          <button
-            className="btn ghost"
-            onClick={() => { setFilters({ customer: '', site: '', category: '', status: '' }); setParams({}) }}
-          >
-            <Icon name="close" />Clear
-          </button>
-        )}
+        <div style={{ display: 'flex', gap: 9, flexWrap: 'wrap' }}>
+          {dirty && (
+            <button
+              className="btn ghost"
+              onClick={() => { setFilters({ customer: '', site: '', category: '', status: '' }); setParams({}) }}
+            >
+              <Icon name="close" />Clear
+            </button>
+          )}
+          {can('equipment.create') && (
+            <button
+              className="btn primary"
+              onClick={() => setAdding(true)}
+              disabled={assignableSites.length === 0}
+              title={assignableSites.length === 0 ? 'Add a customer and site first' : undefined}
+            >
+              <Icon name="plus" />Add equipment
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="filters">
@@ -133,6 +147,8 @@ export default function EquipmentList() {
           )}
         </div>
       </section>
+
+      {adding && <EquipmentForm onClose={() => setAdding(false)} />}
     </>
   )
 }

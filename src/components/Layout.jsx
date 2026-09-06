@@ -30,14 +30,19 @@ export default function Layout() {
     { to: '/', icon: 'dashboard', label: 'Dashboard', end: true },
     { to: '/equipment', icon: 'equipment', label: 'Equipment', count: myEquipment.length },
     { to: '/reminders', icon: 'bell', label: 'Reminders', count: attention || null },
-    can('viewAll') && { to: '/customers', icon: 'building', label: 'Customers & sites' }
-  ].filter(Boolean)
+    { to: '/customers', icon: 'building', label: 'Customers & sites' }
+  ]
 
   const recordLinks = [
-    can('labels') && { to: '/labels', icon: 'qr', label: 'QR labels' },
-    { to: '/reports', icon: 'chart', label: 'Reports' },
+    can('labels.print') && { to: '/labels', icon: 'qr', label: 'QR labels' },
+    can('reports.export') && { to: '/reports', icon: 'chart', label: 'Reports' },
     { to: '/requests', icon: 'list', label: 'Service requests', count: openRequests || null },
-    can('viewAll') && { to: '/audit', icon: 'shield', label: 'Audit trail' }
+    can('audit.view') && { to: '/audit', icon: 'shield', label: 'Audit trail' }
+  ].filter(Boolean)
+
+  const adminLinks = [
+    can('users.manage') && { to: '/users', icon: 'user', label: 'User accounts' },
+    can('backup.manage') && { to: '/backup', icon: 'database', label: 'Backup & restore' }
   ].filter(Boolean)
 
   const navItem = ({ to, icon, label, count, end }) => (
@@ -63,14 +68,18 @@ export default function Layout() {
           {links.map(navItem)}
           <div className="group">Records</div>
           {recordLinks.map(navItem)}
+          {adminLinks.length > 0 && <div className="group">Administration</div>}
+          {adminLinks.map(navItem)}
         </nav>
 
         <div className="whoami">
-          <span className="avatar">{initials(me.name)}</span>
-          <span className="who">
-            <b>{me.name}</b>
-            <span>{me.role}</span>
-          </span>
+          <NavLink to="/account" className="who-link" title="Your account">
+            <span className="avatar">{initials(me.name)}</span>
+            <span className="who">
+              <b>{me.name}</b>
+              <span>{me.role}</span>
+            </span>
+          </NavLink>
           <button className="icon-btn" onClick={signOut} title="Sign out" aria-label="Sign out">
             <Icon name="logout" />
           </button>
@@ -116,6 +125,13 @@ export default function Layout() {
 
         <div className="ribbon">Demo environment — sample data, not real customer records</div>
 
+        {me.mustChangePassword && location.pathname !== '/account' && (
+          <div className="ribbon warn">
+            You are still using the password an administrator issued.{' '}
+            <NavLink to="/account">Change it now</NavLink>
+          </div>
+        )}
+
         <main className="page">
           <Outlet />
         </main>
@@ -129,7 +145,9 @@ export default function Layout() {
           Scan
         </NavLink>
         <NavLink to="/reminders"><Icon name="bell" />Due</NavLink>
-        <NavLink to="/reports"><Icon name="chart" />Reports</NavLink>
+        {can('reports.export')
+          ? <NavLink to="/reports"><Icon name="chart" />Reports</NavLink>
+          : <NavLink to="/account"><Icon name="user" />Account</NavLink>}
       </nav>
     </div>
   )

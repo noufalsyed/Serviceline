@@ -3,7 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { QRCodeCanvas } from 'qrcode.react'
 import Icon from '../components/Icon.jsx'
 import Sheet from '../components/Sheet.jsx'
+import Confirm from '../components/Confirm.jsx'
 import ServiceForm from '../components/ServiceForm.jsx'
+import EquipmentForm from '../components/EquipmentForm.jsx'
 import LabelSheet from '../components/LabelSheet.jsx'
 import { StatusPill, Pill } from '../components/Pill.jsx'
 import { useData, useStore } from '../lib/store.jsx'
@@ -13,10 +15,10 @@ import { fmt, relative, daysUntil } from '../lib/dates.js'
 export default function EquipmentDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { equipment, customer, site, inScope, can, recordsFor, requestsFor, where } = useData()
-  const { addRequest, toast } = useStore()
+  const { equipment, customer, site, inScope, can, hasFullScope, recordsFor, requestsFor, where } = useData()
+  const { addRequest, deleteEquipment, toast } = useStore()
 
-  const [sheet, setSheet] = useState(null) // 'service' | 'label' | 'request'
+  const [sheet, setSheet] = useState(null) // 'service' | 'label' | 'request' | 'edit' | 'delete'
   const [note, setNote] = useState('')
   const [noteError, setNoteError] = useState('')
 
@@ -37,7 +39,7 @@ export default function EquipmentDetail() {
     )
   }
 
-  if (!can('viewAll') && !inScope(e)) {
+  if (!hasFullScope && !inScope(e)) {
     return (
       <>
         <div className="page-head"><h1>Access restricted</h1></div>
@@ -91,14 +93,24 @@ export default function EquipmentDetail() {
           </p>
         </div>
         <div style={{ display: 'flex', gap: 9, flexWrap: 'wrap' }}>
-          {can('service') && (
-            <button className="btn primary" onClick={() => setSheet('service')}>
-              <Icon name="wrench" />Add service
+          {can('equipment.edit') && (
+            <button className="btn" onClick={() => setSheet('edit')}>
+              <Icon name="edit" />Edit
             </button>
           )}
-          {can('request') && (
+          {can('equipment.delete') && (
+            <button className="btn danger-ghost" onClick={() => setSheet('delete')}>
+              <Icon name="trash" />Delete
+            </button>
+          )}
+          {can('request.create') && (
             <button className="btn" onClick={() => setSheet('request')}>
               <Icon name="send" />Request service
+            </button>
+          )}
+          {can('service.create') && (
+            <button className="btn primary" onClick={() => setSheet('service')}>
+              <Icon name="wrench" />Record service
             </button>
           )}
         </div>
@@ -127,7 +139,7 @@ export default function EquipmentDetail() {
             </div>
             <div style={{ fontWeight: 600, fontSize: 13, marginTop: 10 }} className="mono">{e.id}</div>
             <div className="qr-url">{url}</div>
-            {can('labels') && (
+            {can('labels.print') && (
               <button className="btn small block" style={{ marginTop: 10 }} onClick={() => setSheet('label')}>
                 <Icon name="printer" />Label and print
               </button>
@@ -218,6 +230,16 @@ export default function EquipmentDetail() {
 
       {sheet === 'service' && <ServiceForm equipment={e} onClose={() => setSheet(null)} />}
       {sheet === 'label' && <LabelSheet equipment={e} onClose={() => setSheet(null)} />}
+      {sheet === 'edit' && <EquipmentForm existing={e} onClose={() => setSheet(null)} />}
+      {sheet === 'delete' && (
+        <Confirm
+          title={`Delete ${e.id}?`}
+          body={`${e.name} and its ${records.length} service record${records.length === 1 ? '' : 's'} will be removed permanently. Any printed label for this item becomes dead. This cannot be undone.`}
+          confirmLabel="Delete equipment"
+          onConfirm={() => { deleteEquipment(e.id); toast(`${e.id} deleted`); navigate('/equipment') }}
+          onClose={() => setSheet(null)}
+        />
+      )}
       {sheet === 'request' && (
         <Sheet
           title={`Request service · ${e.id}`}

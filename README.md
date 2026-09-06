@@ -13,16 +13,23 @@ and a customer/site permission check.
 
 | Area | What works in this build |
 | --- | --- |
+| **Add equipment** | Full registration form. The identifier is generated automatically from the category series (`FE-000202`, `GN-000009`) and its QR code appears the moment the item is saved, ready to print. |
 | **QR generation** | A real QR code per item, resolving to `…/#/e/<ID>`. Single label preview with PNG download, plus a batch label sheet you can print per site. |
 | **QR scanning** | The phone camera decodes the label and opens the record. Manual ID entry and a demo picker cover desktops and blocked cameras. |
 | **Deep-link security** | Scanning while signed out lands on sign-in, which remembers the target and continues to it after authentication. |
-| **Roles** | Administrator, Manager, Service Engineer, Client User, Viewer. Engineers see only assigned sites; client users see only their own company. Out-of-scope equipment returns *Access restricted*, not the record. |
+| **Customers and sites** | Add, edit and delete customers, and multiple sites under each. Equipment is filed against a customer *and* a site; the three record types stay separate but linked. Deleting is refused while anything still depends on the record. |
+| **Login** | Individual accounts with a user ID and password. Passwords are stored as PBKDF2-SHA256 hashes with a per-account 128-bit salt — never as text. Failed attempts are recorded. |
+| **Permissions** | Eleven named permissions. A role carries defaults; an administrator can override any of them per account, so two engineers can hold different rights. Blocked pages say so rather than vanishing silently. |
+| **Data scope** | Separate from permissions: all customers, one customer, or a chosen set of sites. Out-of-scope equipment returns *Access restricted*, not the record. |
+| **User administration** | Create, edit, disable, re-enable and delete accounts; reset a password. Deleting your own account, or the last active administrator, is refused. |
+| **Password management** | Users change their own password from their account page; a banner nags anyone still using an administrator-issued one. |
 | **Service history** | Full timeline per item with type, engineer, result, remarks, checklist outcome and photographs. |
-| **Inspection** | Category-specific checklists — 9 points for extinguishers, 7 for fire pumps, and so on. Failing any point marks the whole visit failed and tags the equipment out of service. |
+| **Inspection** | Category-specific checklists — 9 points for extinguishers, 7 for fire pumps, 6 for alarm panels, and so on. Failing any point marks the whole visit failed and tags the equipment out of service. |
 | **Photos** | Captured from the phone camera, downscaled in the browser, stored with the record. |
 | **Reminders** | Buckets for overdue, due today, 7 / 30 / 90 days, and cylinder expiry within 30 days. |
 | **Reports** | Six reports, each scoped to the signed-in user, exported as CSV. |
-| **Audit trail** | Sign-in, equipment access, QR scans, service records, requests, label generation and exports, all recorded against the individual account. |
+| **Backup and restore** | Manual snapshots and a daily or weekly schedule, downloadable as JSON files and restorable from either. Each backup records its date, time and the account that made it. Restricted to accounts holding the backup permission. |
+| **Audit trail** | Sign-ins and failures, equipment added, edited and deleted, customer and site changes, service records, QR scans, label generation, report exports, account changes, password resets, backups and restores — all against the individual account, filterable by user. |
 
 Equipment status is derived from dates rather than stored, so it can never go
 stale. Two states are set by hand and override the dates: *Under maintenance*
@@ -30,19 +37,25 @@ and *Failed inspection*.
 
 ## Demo accounts
 
-No passwords — pick an account on the sign-in screen.
+Sign-in needs a user ID and password. The sign-in screen has a **Show demo
+accounts** button that lists and fills them; they are also here:
 
-| Account | Role | Sees |
-| --- | --- | --- |
-| Nabil Haddad | Administrator | Everything |
-| Sara Ibrahim | Manager | All customers, no user administration |
-| Ahmed Al-Otaibi | Service Engineer | 3 sites at Al-Rajhi Industrial |
-| Mohammed Farooq | Service Engineer | 4 sites across Gulf Petrochem and Nesma |
-| Khalid Al-Rajhi | Client User | Al-Rajhi Industrial only; can raise service requests |
-| Layla Nasser | Viewer | Gulf Petrochem, read-only |
+| User ID | Password | Role | Sees |
+| --- | --- | --- | --- |
+| `admin` | `Admin2026` | Administrator | Everything, including users and backups |
+| `sara.i` | `Manager2026` | Manager | All customers; no user administration or backups |
+| `ahmed.a` | `Engineer2026` | Service Engineer | 3 sites at Al-Rajhi Industrial |
+| `mohammed.f` | `Farooq2026` | Service Engineer | 4 sites across Gulf Petrochem and Nesma |
+| `khalid.r` | `Client2026` | Client User | Al-Rajhi Industrial only; can raise service requests |
+| `layla.n` | `Viewer2026` | Viewer | Gulf Petrochem, read-only |
 
-To see the permission model working, sign in as Ahmed and open a Gulf Petrochem
-item — the record is refused, not merely hidden.
+Two things worth trying to see the access model working:
+
+- Sign in as `ahmed.a` and open a Gulf Petrochem item. The record is refused,
+  not merely hidden from the list.
+- Sign in as `admin`, create an account, untick *Export reports*, then sign in
+  as that account. Reports disappears from the navigation, and reaching
+  `#/reports` directly says the permission is missing.
 
 ## Running it on your own machine
 
@@ -113,7 +126,11 @@ only when someone taps Scan. The rest of the app is ~81 kB gzipped.
 
 Everything lives in the browser's `localStorage`, so the demo needs no server and
 each visitor gets their own private copy. Anything you add stays on your device.
-**Audit trail → Reset demo data** restores the original dataset.
+**Backup and restore → Reset demo data** restores the original dataset.
+
+Backups are kept two ways: up to five snapshots inside the browser, and JSON
+files you download. A scheduled backup runs when the app is next opened and one
+is overdue — the browser stand-in for a nightly job on the server.
 
 Seed dates are rebased against the current date on first load, so the dashboard
 always opens with a realistic spread of overdue and upcoming work rather than a
@@ -121,16 +138,22 @@ dataset that ages out.
 
 ## What production would add
 
-This build is the front end and the interaction model. A production deployment
-per the proposal replaces browser storage with:
+This build is the front end and the interaction model, and it is honest about
+where the line sits. **Every check here runs in the browser.** The password
+hashing is real PBKDF2 and no plaintext is ever stored, but anyone can read the
+sample data straight out of `localStorage`. That is the correct shape for a
+demonstration with no server; it is not a security boundary.
+
+A production deployment per the proposal replaces browser storage with:
 
 - **FastAPI** backend and **MySQL** database
-- Password authentication with hashing, sessions and server-side authorisation —
-  the role checks here are demonstrations of the model, not a security boundary
+- The same login and permission model enforced server-side, with sessions and
+  per-request authorisation — so the checks bind rather than merely guide the UI
 - Server-side scheduled reminders with email delivery
 - File storage for photographs and documents
 - Historical data import from Excel/CSV
-- Server-side audit logging
+- Server-side audit logging, append-only
+- Database-level backups on the host, rather than browser snapshots
 
 ---
 

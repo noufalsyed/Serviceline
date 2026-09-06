@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Icon from '../components/Icon.jsx'
+import EquipmentForm from '../components/EquipmentForm.jsx'
 import { StatusPill } from '../components/Pill.jsx'
 import { useData } from '../lib/store.jsx'
 import { buckets, statusOf } from '../lib/status.js'
@@ -17,6 +19,7 @@ const STATUS_ORDER = [
 export default function Dashboard() {
   const navigate = useNavigate()
   const { me, myEquipment, myRecords, scopeLabel, where, can } = useData()
+  const [adding, setAdding] = useState(false)
 
   const b = buckets(myEquipment)
   const counts = myEquipment.reduce((acc, e) => {
@@ -57,9 +60,9 @@ export default function Dashboard() {
           <h1>Dashboard</h1>
           <p>{stamp()} · signed in as {me.name}</p>
         </div>
-        {can('service') && (
-          <button className="btn primary" onClick={() => navigate('/scan')}>
-            <Icon name="qr" />Scan and service
+        {can('equipment.create') && (
+          <button className="btn primary" onClick={() => setAdding(true)}>
+            <Icon name="plus" />Add equipment
           </button>
         )}
       </div>
@@ -143,6 +146,8 @@ export default function Dashboard() {
           </div>
         </section>
       </div>
+
+      {adding && <EquipmentForm onClose={() => setAdding(false)} />}
     </>
   )
 }

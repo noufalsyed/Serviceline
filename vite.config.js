@@ -17,7 +17,10 @@ export default defineConfig({
   plugins: [react(), useHttps && basicSsl()].filter(Boolean),
   base,
   server: {
-    host: true, // bind to the LAN address as well as localhost
+    // Only expose the LAN address in HTTPS mode. Over plain HTTP a phone
+    // reaching 192.168.x.x gets an insecure context, where neither the camera
+    // nor crypto.subtle (used for password hashing) is available.
+    host: useHttps,
     port: 5173
   },
   preview: {
