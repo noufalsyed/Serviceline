@@ -5,7 +5,7 @@ import { useData, useStore } from '../lib/store.jsx'
 
 export default function Account() {
   const { me, permissions, scopeLabel } = useData()
-  const { changePassword, toast } = useStore()
+  const { changePassword, signOut, toast } = useStore()
 
   const [form, setForm] = useState({ current: '', next: '', confirm: '' })
   const [error, setError] = useState('')
@@ -37,6 +37,9 @@ export default function Account() {
           <h1>Your account</h1>
           <p>{me.name} · <span className="mono">{me.login}</span></p>
         </div>
+        <button className="btn" onClick={signOut}>
+          <Icon name="logout" />Sign out
+        </button>
       </div>
 
       {me.mustChangePassword && (
